@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Call for Proposals | ExploitX Meetup 2026</title>
+
+<link rel="stylesheet" href="cfp_style.css">
+<link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+</head>
+<body>
+
+<header>
+    <a href="index.html">← Back to Event</a>
+    <h1>Call for Proposals</h1>
+    <p>ExploitX Cybersecurity & Networking Meetup 2026</p>
+</header>
+
+<main>
+<section class="rsvp-section">
+    <div class="container">
+        <h1 class="title">Submit Your Proposal</h1>
+        <form id="cfpForm">
+
+            <h2 class="section-title">Proposal Details</h2>
+
+            <div class="form-group">
+                <label>Proposal Title <span>*</span></label>
+                <input type="text" class="proposal-title" required>
+            </div>
+
+            <div class="form-group">
+                <label>Proposal Description <span>*</span></label>
+                <div class="quill-editor" id="editor-description"></div>
+                <input type="hidden" class="proposal-description">
+            </div>
+
+            <div class="form-group">
+                <label>Proposal Takeaways <span>*</span></label>
+                <div class="quill-editor" id="editor-takeaways"></div>
+                <input type="hidden" class="proposal-takeaways">
+            </div>
+
+            <div class="form-group">
+                <label>Session Type <span>*</span></label>
+                <select class="session-type" required>
+                    <option value="">Select session type</option>
+                    <option value="full-talk">Full Talk</option>
+                    <option value="lightning-talk">Lightning Talk</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Is this your first talk? <span>*</span></label>
+                <select class="first-talk" required>
+                    <option value="">Select</option>
+                    <option value="yes">Yes</option>
+                    <option value="no">No</option>
+                </select>
+            </div>
+
+            <h2 class="section-title">Personal Information</h2>
+
+            <div class="form-group">
+                <label>Full Name <span>*</span></label>
+                <input type="text" class="fullname" required>
+            </div>
+
+            <div class="form-group">
+                <label>Occupation<span>*</span></label>
+                <input type="text" class="occupation">
+            </div>
+
+            <div class="form-group">
+                <label>Organization<span>*</span></label>
+                <input type="text" class="organization">
+            </div>
+
+            <div class="form-group">
+                <label>Email <span>*</span></label>
+                <input type="email" class="email" required>
+            </div>
+
+            <div class="form-group">
+                <label>Phone <span>*</span></label>
+                <input type="tel" class="phone" required>
+            </div>
+
+            <button type="submit" class="btn-primary">Submit Proposal</button>
+        </form>
+    </div>
+</section>
+</main>
+
+<footer class="footer">
+    <p id="footerYear"></p>
+</footer>
+
+<!-- Quill JS -->
+<script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+<!-- EmailJS -->
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+
+<script>
+/* ---------------- QUILL EDITORS ---------------- */
+const quillDescription = new Quill("#editor-description", { theme: "snow", placeholder: "Write your proposal description..." });
+const quillTakeaways = new Quill("#editor-takeaways", { theme: "snow", placeholder: "List the proposal takeaways..." });
+
+/* ---------------- LOAD EMAIL CONFIG ---------------- */
+let emailConfig = null;
+
+async function loadEmailConfig() {
+    try {
+        const res = await fetch("/api/config");
+        if (!res.ok) throw new Error("Failed to fetch config");
+        emailConfig = await res.json();
+        emailjs.init(emailConfig.publicKey);
+        console.log("EmailJS initialized");
+    } catch (err) {
+        console.error("Could not load EmailJS config:", err);
+        alert("Could not load EmailJS config. Refresh the page.");
+    }
+}
+loadEmailConfig();
+
+/* ---------------- FORM SUBMIT ---------------- */
+document.getElementById("cfpForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    if (!emailConfig) { alert("EmailJS config not loaded."); return; }
+
+    document.querySelector(".proposal-description").value = quillDescription.root.innerHTML;
+    document.querySelector(".proposal-takeaways").value = quillTakeaways.root.innerHTML;
+
+    const formData = {
+        proposal_title: document.querySelector(".proposal-title").value,
+        proposal_description: document.querySelector(".proposal-description").value,
+        proposal_takeaways: document.querySelector(".proposal-takeaways").value,
+        session_type: document.querySelector(".session-type").value,
+        first_talk: document.querySelector(".first-talk").value,
+        fullname: document.querySelector(".fullname").value,
+        occupation: document.querySelector(".occupation").value,
+        organization: document.querySelector(".organization").value,
+        email: document.querySelector(".email").value,
+        phone: document.querySelector(".phone").value
+    };
+
+    try {
+        // Send owner email
+        await emailjs.send(emailConfig.serviceId, emailConfig.templateOwner, formData);
+        // Send auto-reply
+        await emailjs.send(emailConfig.serviceId, emailConfig.templateAutoReply, formData);
+
+        alert("Your proposal has been submitted successfully!");
+        document.getElementById("cfpForm").reset();
+        setTimeout(() => window.location.href="index.html", 2000);
+    } catch(err) {
+        console.error(err);
+        alert("Submission failed. Try again.");
+    }
+});
+
+/* ---------------- FOOTER YEAR ---------------- */
+document.getElementById("footerYear").textContent = `© ${new Date().getFullYear()} ExploitX Meetup`;
+</script>
+
+</body>
+</html>
