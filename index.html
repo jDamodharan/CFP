@@ -142,7 +142,7 @@ let configLoaded = false;
 /* ---------------- LOAD CONFIG ---------------- */
 async function loadEmailConfig() {
     try {
-        const res = await fetch("/api/config", { cache: "no-store" });
+        const res = await fetch("/api/config.js", { cache: "no-store" });
 
         if (!res.ok) {
             throw new Error("API returned status " + res.status);
