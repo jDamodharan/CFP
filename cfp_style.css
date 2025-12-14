@@ -1,6 +1,4 @@
-/* ========================================
-   ROOT VARIABLES (same as your base theme)
-======================================== */
+/* ================= ROOT VARIABLES ================= */
 :root {
     --color-bg: #f9fafb;
     --color-bg-card: #ffffff;
@@ -9,222 +7,171 @@
 
     --color-primary: #0b76ff;
     --color-primary-dark: #0056c7;
-    --color-primary-light: rgba(11, 118, 255, 0.25);
+    --color-primary-light: rgba(11,118,255,0.25);
 
     --color-border: #e5e7eb;
-    --color-border-light: #f3f4f6;
 
     --spacing-xs: 6px;
     --spacing-sm: 10px;
     --spacing-md: 20px;
     --spacing-lg: 32px;
-    --spacing-xl: 48px;
 
     --radius-sm: 6px;
     --radius-md: 10px;
 
-    --shadow-sm: 0px 4px 12px rgba(0,0,0,0.05);
+    --shadow-sm: 0 4px 12px rgba(0,0,0,0.05);
 
-    --max-width-narrow: 520px;
+    --max-width: 520px;
     --font-body: "Inter", sans-serif;
-    --transition: all 0.25s ease;
 }
 
-/* ========================================
-   GLOBAL RESET
-======================================== */
+/* ================= GLOBAL RESET ================= */
 * {
+    box-sizing: border-box;
+    max-width: 100%;
+}
+
+html, body {
     margin: 0;
     padding: 0;
-    box-sizing: border-box;
+    overflow-x: hidden;
 }
 
 body {
     font-family: var(--font-body);
     background: var(--color-bg);
     color: var(--color-text);
-    padding: var(--spacing-md);
-    line-height: 1.6;
+    padding: 16px;
 }
 
-/* ========================================
-   PAGE HEADER
-======================================== */
+/* ================= HEADER ================= */
 header {
     text-align: center;
-    margin-bottom: var(--spacing-lg);
-}
-
-header a {
-    color: var(--color-primary);
-    text-decoration: none;
-    font-weight: 500;
-    font-size: 0.9rem;
+    margin-bottom: 24px;
 }
 
 header h1 {
-    margin-top: var(--spacing-xs);
     font-size: 2rem;
-    font-weight: 700;
 }
 
 header p {
     color: var(--color-text-light);
 }
 
-/* ========================================
-   MAIN FORM CONTAINER
-======================================== */
+/* ================= CONTAINER ================= */
 .container {
-    max-width: var(--max-width-narrow);
-    margin: 0 auto;
-    background: var(--color-bg-card);
-    padding: var(--spacing-lg);
-    border-radius: var(--radius-md);
-    box-shadow: var(--shadow-sm);
-    border: 1px solid var(--color-border);
-}
-
-/* Section Titles */
-.section-title {
-    font-size: 1.25rem;
-    font-weight: 600;
-    color: var(--color-text);
-    margin: var(--spacing-md) 0 var(--spacing-sm);
-}
-
-/* ========================================
-   FORM FIELD STYLING
-======================================== */
-.form-group {
-    margin-bottom: var(--spacing-md);
-}
-
-.form-group label {
-    display: block;
-    margin-bottom: var(--spacing-xs);
-    font-weight: 600;
-    color: var(--color-text);
-}
-
-.form-group label span {
-    color: #ef4444;
-}
-
-/* Inputs + Select */
-input[type="text"],
-input[type="email"],
-input[type="tel"],
-select {
     width: 100%;
-    padding: var(--spacing-sm);
+    max-width: var(--max-width);
+    margin: auto;
+    background: var(--color-bg-card);
+    padding: 24px;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--color-border);
+    box-shadow: var(--shadow-sm);
+}
+
+/* ================= FORM ================= */
+form {
+    width: 100%;
+}
+
+.section-title {
+    font-size: 1.2rem;
+    margin: 20px 0 10px;
+}
+
+.form-group {
+    width: 100%;
+    margin-bottom: 16px;
+}
+
+label {
+    display: block;
+    margin-bottom: 6px;
+    font-weight: 600;
+}
+
+label span {
+    color: red;
+}
+
+/* ================= INPUTS ================= */
+input,
+select,
+button {
+    width: 100%;
+    display: block;
+    padding: 12px;
+    font-size: 0.95rem;
+}
+
+input,
+select {
     border-radius: var(--radius-sm);
     border: 1px solid var(--color-border);
-    background: var(--color-bg-card);
-    font-size: 0.95rem;
-    color: var(--color-text);
-    transition: var(--transition);
 }
 
 input:focus,
 select:focus {
-    border-color: var(--color-primary);
     outline: none;
-    box-shadow: 0 0 0 3px var(--color-primary-light);
-    transform: translateY(-2px);
-}
-
-input:hover,
-select:hover {
     border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px var(--color-primary-light);
 }
 
-/* Dropdown arrow */
+/* ================= SELECT ARROW ================= */
 select {
     appearance: none;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%230b76ff' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12'%3E%3Cpath fill='%230b76ff' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
     background-repeat: no-repeat;
-    background-position: right var(--spacing-md) center;
-    padding-right: var(--spacing-xl);
+    background-position: right 14px center;
+    padding-right: 40px;
 }
 
-/* ========================================
-   QUILL EDITOR STYLING
-======================================== */
+/* ================= QUILL ================= */
 .quill-editor {
-    background: var(--color-bg-card);
     border: 1px solid var(--color-border);
     border-radius: var(--radius-sm);
-    margin-bottom: var(--spacing-md);
-}
-
-.ql-toolbar {
-    border-radius: var(--radius-sm) var(--radius-sm) 0 0;
-    border-color: var(--color-border);
 }
 
 .ql-container {
-    border-radius: 0 0 var(--radius-sm) var(--radius-sm);
-    border-color: var(--color-border);
-    min-height: 180px;
+    min-height: 150px;
 }
 
-/* ========================================
-   SUBMIT BUTTON (CFP style)
-======================================== */
+/* ================= BUTTON ================= */
 .btn-primary {
-    width: 100%;
-    padding: 14px;
+    background: linear-gradient(135deg, var(--color-primary), var(--color-primary-dark));
+    color: white;
+    font-weight: 700;
     border: none;
     border-radius: var(--radius-md);
-    background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
-    color: white;
-    font-size: 1.05rem;
-    font-weight: 700;
     cursor: pointer;
-    letter-spacing: 0.5px;
-    transition: var(--transition);
-    position: relative;
-    overflow: hidden;
-    text-transform: uppercase;
 }
 
-.btn-primary::before {
-    content: "";
-    position: absolute;
-    left: -100%;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(
-        90deg,
-        transparent,
-        rgba(255,255,255,0.3),
-        transparent
-    );
-    transition: left 0.5s;
-}
-
-.btn-primary:hover::before {
-    left: 100%;
-}
-
-.btn-primary:hover {
-    background: linear-gradient(135deg, var(--color-primary-dark), var(--color-primary));
-    transform: translateY(-3px);
-    box-shadow: 0px 8px 24px rgba(11, 118, 255, 0.4);
-}
-
-.btn-primary:active {
-    transform: translateY(-1px);
-}
-
-/* ========================================
-   FOOTER
-======================================== */
+/* ================= FOOTER ================= */
 footer {
     text-align: center;
-    margin-top: var(--spacing-lg);
-    color: var(--color-text-light);
+    margin-top: 24px;
     font-size: 0.85rem;
+    color: var(--color-text-light);
+}
+
+/* ================= MOBILE ================= */
+@media (max-width: 480px) {
+    body {
+        padding: 8px;
+    }
+
+    .container {
+        padding: 16px;
+    }
+
+    header h1 {
+        font-size: 1.5rem;
+    }
+
+    input,
+    select,
+    button {
+        min-height: 44px;
+    }
 }
