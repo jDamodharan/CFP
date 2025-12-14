@@ -137,14 +137,23 @@ let otpExpiresAt = null;
 let otpAttempts = 0;
 let emailVerified = false;
 let resendCooldown = false;
+let configLoaded = false;
 
 /* ---------------- LOAD CONFIG ---------------- */
 async function loadEmailConfig() {
-    const res = await fetch("/api/config");
-    const cfg = await res.json();
-    emailMain = cfg.main;
-    emailOtp = cfg.otp;
+    try {
+        const res = await fetch("/api/config");
+        const cfg = await res.json();
+        emailMain = cfg.main;
+        emailOtp = cfg.otp;
+        configLoaded = true;
+        console.log("Email config loaded");
+    } catch (err) {
+        alert("Failed to load email configuration");
+        console.error(err);
+    }
 }
+
 loadEmailConfig();
 
 /* ---------------- OTP HELPERS ---------------- */
@@ -168,10 +177,11 @@ function startResendCooldown() {
 
 /* ---------------- SEND OTP ---------------- */
 document.getElementById("sendOtpBtn").addEventListener("click", async () => {
-    if (resendCooldown) {
-        alert("Please wait before requesting another OTP");
+    if (!configLoaded || !emailOtp) {
+        alert("Email service not ready. Please wait and try again.");
         return;
     }
+
 
     const email = document.querySelector(".email").value.trim();
     if (!email) {
@@ -190,7 +200,7 @@ document.getElementById("sendOtpBtn").addEventListener("click", async () => {
         await emailjs.send(
             emailOtp.serviceId,
             emailOtp.templateOtp,
-            { user_email: email, otp: generatedOTP }
+            { email: email, otp: generatedOTP }
         );
 
         document.getElementById("otpSection").style.display = "block";
