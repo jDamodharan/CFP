@@ -11,7 +11,6 @@
 <body>
 
 <header>
-    <a href="index.html">← Back to Event</a>
     <h1>Call for Proposals</h1>
     <p>ExploitX Cybersecurity & Networking Meetup 2026</p>
 </header>
@@ -152,7 +151,7 @@ document.getElementById("cfpForm").addEventListener("submit", async (e) => {
 
         alert("Your proposal has been submitted successfully!");
         document.getElementById("cfpForm").reset();
-        setTimeout(() => window.location.href="index.html", 2000);
+        setTimeout(() => window.location.href="cfp.html", 2000);
     } catch(err) {
         console.error(err);
         alert("Submission failed. Try again.");
