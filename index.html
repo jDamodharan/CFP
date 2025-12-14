@@ -158,10 +158,7 @@ async function loadEmailConfig() {
         emailOtp = cfg.otp;
         configLoaded = true;
 
-        console.log("Email config loaded successfully");
     } catch (err) {
-        console.error("Config load error:", err);
-        alert("Email service unavailable. Please refresh the page.");
     }
 }
 loadEmailConfig();
