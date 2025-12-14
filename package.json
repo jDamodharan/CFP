@@ -1,0 +1,13 @@
+{
+  "name": "cfp-exploitx",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "vercel dev",
+    "build": "vercel build",
+    "start": "vercel start"
+  },
+  "dependencies": {
+    "@vercel/node": "^3.0.0"
+  }
+}
