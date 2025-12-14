@@ -142,18 +142,28 @@ let configLoaded = false;
 /* ---------------- LOAD CONFIG ---------------- */
 async function loadEmailConfig() {
     try {
-        const res = await fetch("/api/config");
+        const res = await fetch("/api/config", { cache: "no-store" });
+
+        if (!res.ok) {
+            throw new Error("API returned status " + res.status);
+        }
+
         const cfg = await res.json();
+
+        if (!cfg.main || !cfg.otp) {
+            throw new Error("Invalid config response");
+        }
+
         emailMain = cfg.main;
         emailOtp = cfg.otp;
         configLoaded = true;
-        console.log("Email config loaded");
+
+        console.log("Email config loaded successfully");
     } catch (err) {
-        alert("Failed to load email configuration");
-        console.error(err);
+        console.error("Config load error:", err);
+        alert("Email service unavailable. Please refresh the page.");
     }
 }
-
 loadEmailConfig();
 
 /* ---------------- OTP HELPERS ---------------- */
