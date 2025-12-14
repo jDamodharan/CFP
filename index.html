@@ -81,8 +81,20 @@
             </div>
 
             <div class="form-group">
+                <button type="button" id="sendOtpBtn" class="btn-primary">Send OTP</button>
+            </div>
+
+            <div class="form-group" id="otpSection" style="display:none;">
+                <label>Enter OTP <span>*</span></label>
+                <input type="text" id="otpInput" maxlength="6" placeholder="6-digit OTP">
+                <button type="button" id="verifyOtpBtn" class="btn-primary">Verify OTP</button>
+            </div>
+
+
+            <div class="form-group">
                 <label>Phone <span>*</span></label>
-                <input type="tel" class="phone" required>
+                <input type="tel" class="phone" required maxlength="10"
+                    pattern="[0-9]{10}" placeholder="10-digit phone number">
             </div>
 
             <div class="form-group">
@@ -106,36 +118,138 @@
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 
 <script>
-/* ---------------- QUILL EDITORS ---------------- */
-const quillDescription = new Quill("#editor-description", { theme: "snow", placeholder: "Write your proposal description..." });
-const quillTakeaways = new Quill("#editor-takeaways", { theme: "snow", placeholder: "List the proposal takeaways..." });
+/* ---------------- QUILL ---------------- */
+const quillDescription = new Quill("#editor-description", {
+    theme: "snow",
+    placeholder: "Write your proposal description..."
+});
+const quillTakeaways = new Quill("#editor-takeaways", {
+    theme: "snow",
+    placeholder: "List the proposal takeaways..."
+});
 
-/* ---------------- LOAD EMAIL CONFIG ---------------- */
-let emailConfig = null;
+/* ---------------- EMAIL CONFIG ---------------- */
+let emailMain = null;
+let emailOtp = null;
 
+/* ---------------- OTP STATE ---------------- */
+let generatedOTP = null;
+let otpExpiresAt = null;
+let otpAttempts = 0;
+let emailVerified = false;
+let resendCooldown = false;
+
+/* ---------------- LOAD CONFIG ---------------- */
 async function loadEmailConfig() {
-    try {
-        const res = await fetch("/api/config");
-        if (!res.ok) throw new Error("Failed to fetch config");
-        emailConfig = await res.json();
-        emailjs.init(emailConfig.publicKey);
-        console.log("EmailJS initialized");
-    } catch (err) {
-        console.error("Could not load EmailJS config:", err);
-        alert("Could not load EmailJS config. Refresh the page.");
-    }
+    const res = await fetch("/api/config");
+    const cfg = await res.json();
+    emailMain = cfg.main;
+    emailOtp = cfg.otp;
 }
 loadEmailConfig();
+
+/* ---------------- OTP HELPERS ---------------- */
+function generateOTP() {
+    return Math.floor(100000 + Math.random() * 900000).toString();
+}
+
+function isOtpExpired() {
+    return !otpExpiresAt || Date.now() > otpExpiresAt;
+}
+
+function startResendCooldown() {
+    resendCooldown = true;
+    document.getElementById("sendOtpBtn").disabled = true;
+
+    setTimeout(() => {
+        resendCooldown = false;
+        document.getElementById("sendOtpBtn").disabled = false;
+    }, 60000); // 60 sec
+}
+
+/* ---------------- SEND OTP ---------------- */
+document.getElementById("sendOtpBtn").addEventListener("click", async () => {
+    if (resendCooldown) {
+        alert("Please wait before requesting another OTP");
+        return;
+    }
+
+    const email = document.querySelector(".email").value.trim();
+    if (!email) {
+        alert("Enter email first");
+        return;
+    }
+
+    generatedOTP = generateOTP();
+    otpExpiresAt = Date.now() + (5 * 60 * 1000); // 5 minutes
+    otpAttempts = 0;
+    emailVerified = false;
+
+    emailjs.init(emailOtp.publicKey);
+
+    try {
+        await emailjs.send(
+            emailOtp.serviceId,
+            emailOtp.templateOtp,
+            { user_email: email, otp: generatedOTP }
+        );
+
+        document.getElementById("otpSection").style.display = "block";
+        startResendCooldown();
+        alert("OTP sent. Valid for 5 minutes.");
+    } catch (e) {
+        alert("Failed to send OTP");
+        console.error(e);
+    }
+});
+
+/* ---------------- VERIFY OTP ---------------- */
+document.getElementById("verifyOtpBtn").addEventListener("click", () => {
+    const entered = document.getElementById("otpInput").value.trim();
+
+    if (isOtpExpired()) {
+        alert("OTP expired. Please request a new one.");
+        generatedOTP = null;
+        return;
+    }
+
+    otpAttempts++;
+    if (otpAttempts > 3) {
+        alert("Too many attempts. Request a new OTP.");
+        generatedOTP = null;
+        return;
+    }
+
+    if (entered === generatedOTP) {
+        emailVerified = true;
+        generatedOTP = null;
+        alert("Email verified successfully");
+    } else {
+        alert("Invalid OTP");
+    }
+});
 
 /* ---------------- FORM SUBMIT ---------------- */
 document.getElementById("cfpForm").addEventListener("submit", async (e) => {
     e.preventDefault();
-    if (!emailConfig) { alert("EmailJS config not loaded."); return; }
 
-    document.querySelector(".proposal-description").value = quillDescription.root.innerHTML;
-    document.querySelector(".proposal-takeaways").value = quillTakeaways.root.innerHTML;
+    if (!emailVerified) {
+        alert("Verify your email before submitting");
+        return;
+    }
 
-    const formData = {
+    const phone = document.querySelector(".phone").value.trim();
+    if (!/^[0-9]{10}$/.test(phone)) {
+        alert("Phone number must be exactly 10 digits");
+        return;
+    }
+
+    document.querySelector(".proposal-description").value =
+        quillDescription.root.innerHTML;
+    document.querySelector(".proposal-takeaways").value =
+        quillTakeaways.root.innerHTML;
+
+    const data = {
         proposal_title: document.querySelector(".proposal-title").value,
         proposal_description: document.querySelector(".proposal-description").value,
         proposal_takeaways: document.querySelector(".proposal-takeaways").value,
@@ -145,28 +259,38 @@ document.getElementById("cfpForm").addEventListener("submit", async (e) => {
         occupation: document.querySelector(".occupation").value,
         organization: document.querySelector(".organization").value,
         email: document.querySelector(".email").value,
-        phone: document.querySelector(".phone").value,
+        phone,
         location: document.querySelector(".location").value
     };
 
+    emailjs.init(emailMain.publicKey);
+
     try {
-        // Send owner email
-        await emailjs.send(emailConfig.serviceId, emailConfig.templateOwner, formData);
-        // Send auto-reply
-        await emailjs.send(emailConfig.serviceId, emailConfig.templateAutoReply, formData);
+        await emailjs.send(
+            emailMain.serviceId,
+            emailMain.templateOwner,
+            data
+        );
+        await emailjs.send(
+            emailMain.serviceId,
+            emailMain.templateAutoReply,
+            data
+        );
 
         alert("Your proposal has been submitted successfully!");
         document.getElementById("cfpForm").reset();
-        setTimeout(() => window.location.href="cfp.html", 2000);
-    } catch(err) {
+        setTimeout(() => window.location.href = "index.html", 2000);
+    } catch (err) {
+        alert("Submission failed");
         console.error(err);
-        alert("Submission failed. Try again.");
     }
 });
 
-/* ---------------- FOOTER YEAR ---------------- */
-document.getElementById("footerYear").textContent = `© ${new Date().getFullYear()} ExploitX Meetup`;
+/* ---------------- FOOTER ---------------- */
+document.getElementById("footerYear").textContent =
+    `© ${new Date().getFullYear()} ExploitX Meetup`;
 </script>
+
 
 </body>
 </html>
