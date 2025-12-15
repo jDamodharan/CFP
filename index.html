@@ -76,6 +76,11 @@
             </div>
 
             <div class="form-group">
+                <label>Years of Experience<span>*</span></label>
+                <input type="text" class="experience">
+            </div>
+
+            <div class="form-group">
                 <label>Email <span>*</span></label>
                 <input type="email" class="email" required>
             </div>
@@ -274,6 +279,7 @@ document.getElementById("cfpForm").addEventListener("submit", async (e) => {
         gender: document.querySelector(".gender").value,
         occupation: document.querySelector(".occupation").value,
         organization: document.querySelector(".organization").value,
+        experience: document.querySelector(".experience").value,
         email: document.querySelector(".email").value,
         phone,
         location: document.querySelector(".location").value
